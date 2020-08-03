@@ -1,0 +1,83 @@
+@page "/Send"
+@inject IAuthService AuthService
+@layout MainLayout
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<style>
+    form .row {
+        margin-bottom: 16px;
+    }
+</style>
+    <RadzenTemplateForm Data=@myBook Submit="@((BookModel args) => { Submit(args); })">
+        <div class="row" style="align-items: baseline;">
+            <div class="col-md-9">
+                <RadzenFieldset Text="Your Book Request">
+                    <div class="row">
+                        <div class="col-md-12 align-items-center d-flex">
+                            <RadzenLabel Text="Credit Card" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenDropDown @bind-Value="myBook.state" AllowClear="true" Placeholder="Select something" Data="@cards" style="width: 100%;" TextProperty="CardId" ValueProperty="CardId" Name="CardId">
+                            </RadzenDropDown>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 align-items-center d-flex">
+                            <RadzenLabel Text="Book Name" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenTextBox style="width: 100%;" Name="Name" @bind-Value="myBook.BookName" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 align-items-center d-flex">
+                            <RadzenLabel Text="Email" />
+                        </div>
+                        <div class="col-md-8">
+                            <RadzenTextBox style="width: 100%;" Name="Email" @bind-Value="myBook.Email" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="align-items-center d-flex col-md-3">
+                            <RadzenLabel Text="Suggested Price (Tomans)" />
+                        </div>
+                        <div class="col-md-12">
+                            <RadzenNumeric Placeholder="1000" style="width: 100%;" Name="Price" @bind-Value="myBook.Price" />
+                        </div>
+                    </div>
+                </RadzenFieldset>
+                <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Send" />
+            </div>
+        </div>
+    </RadzenTemplateForm>
+@code{
+    private BookModel myBook = new BookModel() ;
+    public class ListCard
+    {
+        public string CardId { get; set; }
+    }
+    List<ListCard> cards = new List<ListCard>()
+{
+      new ListCard() { CardId = "forSell" },
+        new ListCard() { CardId = "toBuy" },
+        new ListCard() {CardId = "toExchange"}
+    };
+    private async Task Submit(BookModel args)
+    {
+
+        await Http.PostJsonAsync<object>("http://localhost:5000/api/BookItem", args);
+        NavigationManager.NavigateTo("/dashboard");
+
+    }
+
+    void Cancel()
+    {
+        //
+    }
+
+}

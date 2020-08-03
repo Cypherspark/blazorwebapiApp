@@ -1,0 +1,23 @@
+﻿@inherits LayoutComponentBase
+<AuthorizeView>
+    <Authorized>
+        <div class="justify-content-center">
+            <div style=" margin: 0 auto; position:fixed;top:20px;left:15px;">
+                Hello, @context.User.Identity.Name!
+            </div>
+            <div>
+                <NavMenu />
+            </div>
+
+            <div style="align-items: baseline;" >
+
+                @Body
+            </div>
+        </div>
+
+
+    </Authorized>
+<NotAuthorized>
+    <a href="/">Register</a>
+</NotAuthorized>
+</AuthorizeView>

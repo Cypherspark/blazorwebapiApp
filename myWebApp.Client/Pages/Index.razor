@@ -1,0 +1,159 @@
+﻿@page "/"
+@layout AuthLayout
+@inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
+@inject IAuthService AuthService
+
+@if (ShowErrors)
+{
+    <div class="alert alert-danger" role="alert">
+
+        @foreach (var error in Errors)
+        { 
+            <p>@error</p>
+        }
+    </div>
+}
+
+<div class="form-structor" style=" margin: 0 auto;">
+
+    <div class="signup @CssClass1()">
+        <h2 class="form-title" id="signup" @onclick="MemberFunctionSignup"><span>or</span>Sign up</h2>
+        <EditForm Model="RegisterModel" OnValidSubmit="HandleRegistration">
+            <DataAnnotationsValidator />
+            @*<ValidationSummary />*@
+            <div class="form-group margin-box">
+                <RadzenTextBox Placeholder="Username" style="width: 100%;" Name="Username" @bind-Value="RegisterModel.UserName" />
+                <ValidationMessage For="@(() => RegisterModel.UserName)" />
+            </div>
+            <div class="form-group margin-box">
+                <RadzenTextBox Placeholder="email" style="width: 100%;" Name="email" @bind-Value="RegisterModel.Email" />
+                <ValidationMessage For="@(() => RegisterModel.Email)" />
+            </div>
+            <div class="form-group margin-box">
+                <RadzenPassword Placeholder="Password" style="width: 100%;" Name="password" @bind-Value="RegisterModel.Password" />
+                <ValidationMessage For="@(() => RegisterModel.Password)" />
+            </div>
+            <div class="form-group margin-box">
+                <RadzenPassword Placeholder="Confirm password" style="width: 100%;" Name="Confirm password" @bind-Value="RegisterModel.ConfirmPassword" />
+                <ValidationMessage For="@(() => RegisterModel.ConfirmPassword)" />
+            </div>
+            <button class="submit-btn">Sign up</button>
+        </EditForm>
+    </div>
+    <div class="login @CssClass2()">
+        <div class="center">
+            <h2 class="form-title" id="login" @onclick="MemberFunctionLogin"><span>or</span>Log in</h2>
+            <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-group margin-box">
+                    <label for="email">Email address</label>
+                    <InputText Id="email" Class="form-control my-box" @bind-Value="loginModel.Email" />
+                    <ValidationMessage For="@(() => loginModel.Email)" />
+                </div>
+                <div class="form-group margin-box">
+                    <label for="password">Password</label>
+                    <InputText Id="password" type="password" Class="form-control my-box" @bind-Value="loginModel.Password" />
+                    <ValidationMessage For="@(() => loginModel.Password)" />
+                </div>
+                <button class="submit-btn">Log in</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private RegisterModel RegisterModel = new RegisterModel();
+    private bool ShowErrors;
+    private IEnumerable<string> Errors;
+    private async Task HandleRegistration()
+    {
+        ShowErrors = false;
+
+        var result = await AuthService.Register(RegisterModel);
+        LoginModel loginModel2 = new LoginModel();
+        loginModel2.Email = RegisterModel.Email;
+        loginModel2.Password = RegisterModel.Password;
+
+        if (result.Successful)
+        {
+            var result2 = await AuthService.Login(loginModel);
+            if (result2.Successful)
+            {
+                NavigationManager.NavigateTo("/dashboard");
+            }
+        }
+        else
+        {
+            Errors = result.Errors;
+            ShowErrors = true;
+        }
+    }
+
+
+    private async Task HandleLogin()
+    {
+        ShowErrors = false;
+
+        var result = await AuthService.Login(loginModel);
+
+        if (result.Successful)
+        {
+            NavigationManager.NavigateTo("/dashboard");
+        }
+        else
+        {
+            Errors.Append(result.Error);
+            ShowErrors = true;
+        }
+    }
+
+
+    bool slide;
+
+    void MemberFunctionLogin()
+    {
+        CssClass2();
+    }
+    void MemberFunctionSignup()
+    {
+        CssClass1();
+    }
+    string CssClass2()
+    {
+        if (!slide)
+        {
+            slide = true;
+            return "slide-up";
+
+        }
+        else
+        {
+            slide = false;
+            return string.Empty;
+        }
+    }
+
+    string CssClass1()
+    {
+        if (!slide)
+        {
+            slide = true;
+            return "slide-up";
+
+        }
+        else
+        {
+            slide = false;
+            return string.Empty;
+        }
+
+
+    }
+}
+
+
